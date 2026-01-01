@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="ApkInstaller.vcxproj" />
+  <Project Path="ApkInstaller.vcxproj" Id="63e93b4d-7317-4a0f-8d25-01db376da28c" />
 </Solution>

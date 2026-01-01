@@ -40,11 +40,21 @@ int wmain()
 		}
 	}
 
-	//获取adb.exe路径和apk安装包路径
+	//获取adb.exe路径
 	wcscpy_s(adbPath, MAX_PATH, currentPath);
 	wcscat_s(adbPath, MAX_PATH, L"adb\\adb.exe");
 	std::wcout << L"adb路径如下：" << adbPath << L"\n";
 
+	//启动adb服务
+	wcscpy_s(adbInstallapkCmd, MAX_PATH, adbPath);
+	wcscat_s(adbInstallapkCmd, MAX_PATH, L" start-server");
+	std::wcout << adbInstallapkCmd << L"\n";
+	CreateProcess(NULL, adbInstallapkCmd, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+	WaitForSingleObject(pi.hProcess, INFINITE);
+	CloseHandle(pi.hThread);
+	CloseHandle(pi.hProcess);
+
+	//获取apk安装包路径
 	wcscpy_s(apkPath, MAX_PATH, currentPath);
 	wcscat_s(apkPath, MAX_PATH, L"apks\\");
 	std::wcout << L"扫描到的安装包如下：\n";
@@ -85,6 +95,17 @@ int wmain()
 		std::wcout << i + 1 << L": " << apkName[i] << L"\n";
 	}
 
+	//用户确认是否要安装
+	std::wstring userInput;
+	std::wcout << L"是否开始安装以上" << apkCount << L"个安装包？\n如果是，请完整地打出小写yes。\n>>";
+	std::wcin >> userInput;
+	if (wcscmp(userInput.c_str(), L"yes") != 0)
+	{
+		std::wcout << L"用户取消安装，程序结束。\n";
+		ExitProcess(EXIT_FAILURE);
+	}
+
+	//开始安装apk
 	std::wcout << L"开始安装...\n";
 	for (ULONGLONG i = 0; i < apkCount; i++)
 	{
@@ -104,5 +125,15 @@ int wmain()
 		CloseHandle(pi.hProcess);
 	}
 
-	MessageBox(NULL, L"安装完成", L"提示", MB_OK | MB_SYSTEMMODAL | MB_TOPMOST | MB_SETFOREGROUND | MB_ICONINFORMATION);
+	//结束adb服务
+	wcscpy_s(adbInstallapkCmd, MAX_PATH, adbPath);
+	wcscat_s(adbInstallapkCmd, MAX_PATH, L" kill-server");
+	std::wcout << adbInstallapkCmd << L"\n";
+	CreateProcess(NULL, adbInstallapkCmd, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+	WaitForSingleObject(pi.hProcess, INFINITE);
+	CloseHandle(pi.hThread);
+	CloseHandle(pi.hProcess);
+
+	MessageBox(GetConsoleWindow(), L"安装完成", L"提示", MB_OK | MB_SYSTEMMODAL | MB_TOPMOST | MB_SETFOREGROUND | MB_ICONINFORMATION);
+	ExitProcess(EXIT_SUCCESS);
 }
